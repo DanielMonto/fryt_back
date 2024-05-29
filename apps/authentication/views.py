@@ -4,13 +4,11 @@ from django.http import HttpRequest
 from rest_framework.permissions import AllowAny
 from .models import UserOwnModel,PasswordResetRequest
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework_simplejwt.exceptions import TokenError
 from django.template.loader import render_to_string
 from django.contrib.auth.hashers import make_password
 from apps.functions import are_keys_in_dict
 from .serializers import UserSerializer,MyTokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 from django.conf import settings
