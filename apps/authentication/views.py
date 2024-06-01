@@ -38,11 +38,11 @@ class MyTokenObtainPairView(TokenObtainPairView):
                     request.data['username']=user.username
                     return super().post(request)
                 # Incorrect password
-                return Response('incorrect password',status=400)
+                return Response({'message':'incorrect password'},status=400)
             # Email unused
-            return Response(f'email {email} unused',status=400)
+            return Response({'message':f'email {email} unused'},status=400)
         # Email or password fields unprovided
-        return Response(error_message,status=400)
+        return Response({'message':error_message},status=400)
 
 class UsersAPIView(APIView):
     '''
@@ -70,13 +70,13 @@ class UsersAPIView(APIView):
                     user=UserOwnModel(email=request.data['email'],username=request.data['username'],password=make_password(password))
                     user.save()
                     serializer=UserSerializer(user,many=False)
-                    return Response(serializer.data)
+                    return Response(serializer.data,status=200)
                 # Password incorrect, returns the right error_message (seen in UserOwnModel.safe_password function)
-                return Response(error_message,status=400)
+                return Response({'message':error_message},status=400)
             # Username or email used, with right error_message (seen in UserOwnModel.email_or_username_used function)
-            return Response(error_message,status=400)
+            return Response({'message':error_message},status=400)
         # One or more keys (username, password, email) are not provided by the client, with the right error_message (seen in are_keys_in_dict function)
-        return Response(error_message,status=400)
+        return Response({'message':error_message},status=400)
 
 class ForgotPasswordAPIView(APIView):
     '''
@@ -110,11 +110,11 @@ class ForgotPasswordAPIView(APIView):
                 )
                 email.attach_alternative(html_content, "text/html")
                 email.send()
-                return Response('Email sent', status=200)
+                return Response({'message':'Email sent'}, status=200)
             # Email not found
-            return Response("Email not found", status=400)
+            return Response({'message':"Email not found"}, status=400)
         # Email field not provided
-        return Response(error_message, status=400)
+        return Response({'message':error_message}, status=400)
 
     def put(self, request: HttpRequest):
         '''
@@ -139,15 +139,15 @@ class ForgotPasswordAPIView(APIView):
                         user.password = make_password(new_password)
                         user.save()
                         pass_res_req.delete()
-                        return Response("Password changed successfully", status=200)
+                        return Response({'message':"Password changed successfully"}, status=200)
                     # New password not secure
-                    return Response(error_message, status=400)
+                    return Response({'message':error_message}, status=400)
                 # New password and confirmation do not match
-                return Response("New password and confirmation do not match", status=400)
+                return Response({'message':"New password and confirmation do not match"}, status=400)
             # Invalid code
-            return Response(f"Code {code} is not valid", status=400)
+            return Response({'message':f"Code {code} is not valid"}, status=400)
         # Required fields not provided
-        return Response(error_message, status=400)
+        return Response({'message':error_message}, status=400)
 
 class ResetPasswordAPIView(APIView):
     '''
@@ -177,12 +177,12 @@ class ResetPasswordAPIView(APIView):
                     if password_safe:
                         user.password = make_password(new_password)
                         user.save()
-                        return Response("Password changed successfully", status=200)
+                        return Response({'message':"Password changed successfully"}, status=200)
                     # New password not secure
-                    return Response(error_message, status=400)
+                    return Response({'message':error_message}, status=400)
                 # New password and confirmation do not match
-                return Response("New password and confirmation do not match", status=400)
+                return Response({'message':"New password and confirmation do not match"}, status=400)
             # Old password incorrect
-            return Response('Incorrect old password', status=400)
+            return Response({'message':'Incorrect old password'}, status=400)
         # Required fields not provided
-        return Response(error_message, status=400)
+        return Response({'message':error_message}, status=400)

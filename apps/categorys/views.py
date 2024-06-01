@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
-from .models import Category,CategoryType
+from .models import Category, CategoryType
 from .serializers import CategorySerializer, CategoryTypeSerializer
 from apps.functions import are_keys_in_dict
 from rest_framework.views import APIView
@@ -10,46 +10,46 @@ class CategoryAdminAPIView(APIView):
         View for creation updating and deleting for a category
     '''
     # Endpoint can only be used with admin access
-    permission_classes=[IsAdminUser]
-    def post(self,request):
+    permission_classes = [IsAdminUser]
+    def post(self, request):
         '''
             Post method, manages the creation of a category
         '''
         # Checks if the keys are provided and if not return the right error_message
-        key_safes,error_message=are_keys_in_dict(request.data,'category_name','category_types')
+        key_safes, error_message = are_keys_in_dict(request.data, 'category_name', 'category_types')
         if key_safes:
-            category_name=request.data['category_name']
-            categories_using_category_name=Category.objects.filter(name=category_name)
+            category_name = request.data['category_name']
+            categories_using_category_name = Category.objects.filter(name=category_name)
             # category_name is not used, creates the category with category_name as its name
-            if len(categories_using_category_name)==0:
-                category=Category(name=category_name)
-                category_saved_successfully,message=category.set_category_types(request.data['category_types'])
+            if len(categories_using_category_name) == 0:
+                category = Category(name=category_name)
+                category_saved_successfully, message = category.set_category_types(request.data['category_types'])
                 # Returns the message and the right status
-                return Response(message,status=200 if category_saved_successfully else 400)
+                return Response({'message': message}, status=200 if category_saved_successfully else 400)
             # category_name is used
-            return Response(f'Category name {category_name} is being used',status=400)
+            return Response({'message': f'Category name {category_name} is being used'}, status=400)
         # keys are not safe
-        return Response(error_message,status=400)
+        return Response({'message': error_message}, status=400)
     
-    def delete(self,request):
+    def delete(self, request):
         '''
             Manage deleting process for a category 
         '''
         # Checks if the keys are provided
-        key_safes,message=are_keys_in_dict(request.data,'category_name')
+        key_safes, message = are_keys_in_dict(request.data, 'category_name')
         if key_safes:
-            category_name=request.data['category_name']
-            categories_using_category_name=Category.objects.filter(name=category_name)
+            category_name = request.data['category_name']
+            categories_using_category_name = Category.objects.filter(name=category_name)
             # category_name is used, deletes the category with category_name as its name
-            if len(categories_using_category_name)!=0:
-                category=categories_using_category_name[0]
+            if len(categories_using_category_name) != 0:
+                category = categories_using_category_name[0]
                 category.delete()
                 # Returns the message and the right status
-                return Response(f'Category {category_name} deleted successfully',status=200)
+                return Response({'message': f'Category {category_name} deleted successfully'}, status=200)
             # There is not category with category_name as its name
-            return Response(f'Category {category_name} does not exist',status=400)
+            return Response({'message': f'Category {category_name} does not exist'}, status=400)
         # Some or all keys were not provided
-        return Response(message,status=400)
+        return Response({'message': message}, status=400)
     
     def put(self, request):
         '''
@@ -67,11 +67,11 @@ class CategoryAdminAPIView(APIView):
                 category.name = new_category_name
                 category.save()
                 # Returns the message and the right status
-                return Response(f'Category {category_name} updated successfully', status=200)
+                return Response({'message': f'Category {category_name} updated successfully'}, status=200)
             # There is no category with category_name as its name
-            return Response(f'Category {category_name} does not exist', status=400)
+            return Response({'message': f'Category {category_name} does not exist'}, status=400)
         # Some or all keys were not provided
-        return Response(error_message, status=400)
+        return Response({'message': error_message}, status=400)
 
 class CategoryNormalAPIView(APIView):
     '''
@@ -90,46 +90,46 @@ class CategoryTypeAdminAPIView(APIView):
         View for creation updating and deleting for a category_type
     '''
     # Endpoint can only be used with admin access
-    permission_classes=[IsAdminUser]
-    def post(self,request):
+    permission_classes = [IsAdminUser]
+    def post(self, request):
         '''
             Post method, manages the creation of a category
         '''
         # Checks if the keys are provided and if not return the right error_message
-        key_safes,error_message=are_keys_in_dict(request.data,'category_type_name')
+        key_safes, error_message = are_keys_in_dict(request.data, 'category_type_name')
         if key_safes:
-            category_type_name=request.data['category_type_name']
-            categories_using_category_type_name=CategoryType.objects.filter(name=category_type_name)
+            category_type_name = request.data['category_type_name']
+            categories_using_category_type_name = CategoryType.objects.filter(name=category_type_name)
             # category_type_name is not used, creates the category with category_type_name as its name
-            if len(categories_using_category_type_name)==0:
-                category=CategoryType(name=category_type_name)
+            if len(categories_using_category_type_name) == 0:
+                category = CategoryType(name=category_type_name)
                 category.save()
                 # Category type created successfully
-                return Response(f'Category type {category_type_name} saved successfully',status=200)
+                return Response({'message': f'Category type {category_type_name} saved successfully'}, status=200)
             # category_type_name is used
-            return Response(f'Category type name {category_type_name} is being used',status=400)
+            return Response({'message': f'Category type name {category_type_name} is being used'}, status=400)
         # keys are not safe
-        return Response(error_message,status=400)
+        return Response({'message': error_message}, status=400)
     
-    def delete(self,request):
+    def delete(self, request):
         '''
             Manage deleting process for a category 
         '''
         # Checks if the keys are provided
-        key_safes,message=are_keys_in_dict(request.data,'category_type_name')
+        key_safes, message = are_keys_in_dict(request.data, 'category_type_name')
         if key_safes:
-            category_type_name=request.data['category_type_name']
-            categories_using_category_type_name=CategoryType.objects.filter(name=category_type_name)
+            category_type_name = request.data['category_type_name']
+            categories_using_category_type_name = CategoryType.objects.filter(name=category_type_name)
             # category_type_name is used, deletes the category with category_type_name as its name
-            if len(categories_using_category_type_name)!=0:
-                category=categories_using_category_type_name[0]
+            if len(categories_using_category_type_name) != 0:
+                category = categories_using_category_type_name[0]
                 category.delete()
                 # Returns the message and the right status
-                return Response(f'Category {category_type_name} deleted successfully',status=200)
+                return Response({'message': f'Category {category_type_name} deleted successfully'}, status=200)
             # There is not category with category_type_name as its name
-            return Response(f'Category {category_type_name} does not exist',status=400)
+            return Response({'message': f'Category {category_type_name} does not exist'}, status=400)
         # Some or all keys were not provided
-        return Response(message,status=400)
+        return Response({'message': message}, status=400)
     
     def put(self, request):
         '''
@@ -147,11 +147,11 @@ class CategoryTypeAdminAPIView(APIView):
                 category.name = new_category_type_name
                 category.save()
                 # Returns the message and the right status
-                return Response(f'Category type {category_type_name} updated successfully', status=200)
+                return Response({'message': f'Category type {category_type_name} updated successfully'}, status=200)
             # There is no category with category_type_name as its name
-            return Response(f'Category type {category_type_name} does not exist', status=400)
+            return Response({'message': f'Category type {category_type_name} does not exist'}, status=400)
         # Some or all keys were not provided
-        return Response(error_message, status=400)
+        return Response({'message': error_message}, status=400)
 
 class CategoryTypeNormalAPIView(APIView):
     '''
@@ -164,3 +164,4 @@ class CategoryTypeNormalAPIView(APIView):
         categories = CategoryType.objects.all()
         serializer = CategoryTypeSerializer(categories, many=True)
         return Response(serializer.data)
+
