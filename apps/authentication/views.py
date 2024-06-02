@@ -3,8 +3,9 @@ from rest_framework.views import APIView
 from django.http import HttpRequest
 from rest_framework.permissions import AllowAny
 from .models import UserOwnModel, PasswordResetRequest
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.template.loader import render_to_string
+from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth.hashers import make_password
 from apps.functions import are_keys_in_dict
 from .serializers import UserSerializer, MyTokenObtainPairSerializer
@@ -77,6 +78,26 @@ class UsersAPIView(APIView):
             return Response({'message': error_message, 'field': 'username/email'}, status=400)
         # One or more keys (username, password, email) are not provided by the client, with the right error_message (seen in are_keys_in_dict function)
         return Response({'message': error_message, 'field': 'username/password/email'}, status=400)
+
+class UserAuthAPIView(APIView):
+    def delete(self,request):
+        '''
+            Manage delete process from an user
+        '''
+        key_safes, error_message = are_keys_in_dict(request.data, 'refresh_token')
+        if key_safes:
+            user_id=AccessToken(request.META['HTTP_AUTHORIZATION'].split(' ')[1]).payload['user']['id']
+            user=UserOwnModel.objects.filter(id=user_id).first()
+            if user:
+                user.delete()
+                try:
+                    refresh_token = RefreshToken(request.data['refresh_token'])
+                except TokenError:
+                    return Response({'message':'User delete token invalid'},status=200)
+                refresh_token.blacklist()
+                return Response({'message':'User deleted'},status=200)
+            return Response({'message':'User deleted'},status=200)
+        return Response({'message': error_message, 'field': 'refresh_token'}, status=400)
 
 class ForgotPasswordAPIView(APIView):
     '''
