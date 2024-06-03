@@ -51,6 +51,10 @@ class UsersAPIView(APIView):
     '''
     # Personalization of permissions for an unlogged client can register
     permission_classes = [AllowAny]
+    def get(self,request):
+        users=UserOwnModel.objects.all()
+        serializer=UserSerializer(users,many=True)
+        return Response(serializer.data)
     def post(self, request: HttpRequest):
         '''
             Manage the registering of an user
@@ -78,6 +82,19 @@ class UsersAPIView(APIView):
             return Response({'message': error_message, 'field': 'username/email'}, status=400)
         # One or more keys (username, password, email) are not provided by the client, with the right error_message (seen in are_keys_in_dict function)
         return Response({'message': error_message, 'field': 'username/password/email'}, status=400)
+    def delete(self,request):
+        '''
+            Manage the logout process
+        '''
+        key_safes, error_message = are_keys_in_dict(request.data, 'refresh_token')
+        if key_safes:
+            try:
+                refresh_token = RefreshToken(request.data['refresh_token'])
+            except TokenError:
+                return Response({'message':'Token invalid', 'field':'refresh_token'},status=200)
+            refresh_token.blacklist()
+            return Response({'message':'Token invalided'},status=200)
+        return Response({'message': error_message, 'field': 'refresh_token'}, status=400)
 
 class UserAuthAPIView(APIView):
     def delete(self,request):
@@ -207,3 +224,23 @@ class ResetPasswordAPIView(APIView):
             return Response({'message': 'Incorrect old password', 'field': 'old_password'}, status=400)
         # Required fields not provided
         return Response({'message': error_message, 'field': 'old_password/new_password/new_password_confirmation'}, status=400)
+
+class IsRefreshTokenValidAPIView(APIView):
+    '''
+        Check if the refresh is valid
+    '''
+    permission_classes=[AllowAny]
+    def post(self,request):
+        '''
+            Check if the refresh is valid
+        '''
+        keys_safe, error_message = are_keys_in_dict(request.data, 'refresh_token')
+        # Check if keys are in the request
+        if keys_safe:
+            try:
+                refreshToken=RefreshToken(request.data['refresh_token'])
+                refreshToken.verify()
+                return Response({'message':'Refresh token is valid'},status=200)
+            except TokenError:
+                return Response({'message':'Refresh token is invalid'},status=400)
+        return Response({'message':error_message})
