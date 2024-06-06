@@ -30,7 +30,7 @@ class CategoryAdminAPIView(APIView):
             return Response({'message': f'Category name {category_name} is being used'}, status=400)
         # keys are not safe
         return Response({'message': error_message}, status=400)
-    
+
     def delete(self, request):
         '''
             Manage deleting process for a category 

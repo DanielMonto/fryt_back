@@ -3,3 +3,4 @@ venv/*
 .env
 ca.pem
 db.sqlite3
+private_key.pem

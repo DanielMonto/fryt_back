@@ -29,13 +29,21 @@ class UserOwnModel(AbstractUser):
         users=cls.objects.filter(models.Q(username=username) or models.Q(email=email))
         # Users empty, email and username unused
         if len(users)==0:
-            return False, 'Email and username unused'
+            return False, 'Email and username unused', None
         # Email or username used because users is not empty
         else:
             user=users[0]
             # Chose the right message depending if email and username are used or if one of them is
-            message='Username and email used' if user.username==username and user.email==email else 'Email used' if user.email==email else 'Username used'
-            return True, message
+            if user.username==username and user.email==email:
+                message='Username and email used'
+                field='username/email'
+            elif user.email==email:
+                message='Email used'
+                field='email'
+            else:
+                message='Username used'
+                field='username'
+            return True, message, field
     
     @staticmethod
     def safe_password(password):

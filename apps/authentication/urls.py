@@ -8,7 +8,7 @@ class MyTokenRefreshView(TokenRefreshView):
 
 urlpatterns = [
     path('',UsersAPIView.as_view()),
-    path('refresh/',MyTokenRefreshView.as_view()),
+    path('refresh_token/',MyTokenRefreshView.as_view()),
     path('login/',MyTokenObtainPairView.as_view()),
     path('reset_password/',ResetPasswordAPIView.as_view()),
     path('forgot_password/',ForgotPasswordAPIView.as_view()),

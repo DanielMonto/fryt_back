@@ -26,7 +26,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
             Post method for obtaining the tokens
         '''
         # Checks if all the keys are in dict
-        key_safes, error_message = are_keys_in_dict(request.data, 'email', 'password')
+        key_safes, error_message, field = are_keys_in_dict(request.data, 'email', 'password')
         if key_safes:
             email = request.data['email']
             # Checks if there is an user with client email
@@ -43,7 +43,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
             # Email unused
             return Response({'message': f'email {email} unused', 'field': 'email'}, status=400)
         # Email or password fields unprovided
-        return Response({'message': error_message, 'field': 'email/password'}, status=400)
+        return Response({'message': error_message, 'field': field}, status=400)
 
 class UsersAPIView(APIView):
     '''
@@ -60,13 +60,13 @@ class UsersAPIView(APIView):
             Manage the registering of an user
         '''
         # Checks if all the keys are in dict
-        keys_safe, error_message = are_keys_in_dict(request.data, 'username', 'password', 'email')
+        keys_safe, error_message, field = are_keys_in_dict(request.data, 'username', 'password', 'email')
         if keys_safe:
             username = request.data['username']
             email = request.data['email']
             password = request.data['password']
             # Checks if username or email have an user
-            username_or_email_used, error_message = UserOwnModel.email_or_username_used(username, email)
+            username_or_email_used, error_message, field = UserOwnModel.email_or_username_used(username, email)
             if not username_or_email_used:
                 # Checks if the password is correct
                 password_safe, error_message = UserOwnModel.safe_password(password)
@@ -79,19 +79,19 @@ class UsersAPIView(APIView):
                 # Password incorrect, returns the right error_message (seen in UserOwnModel.safe_password function)
                 return Response({'message': error_message, 'field': 'password'}, status=400)
             # Username or email used, with right error_message (seen in UserOwnModel.email_or_username_used function)
-            return Response({'message': error_message, 'field': 'username/email'}, status=400)
+            return Response({'message': error_message, 'field': field}, status=400)
         # One or more keys (username, password, email) are not provided by the client, with the right error_message (seen in are_keys_in_dict function)
-        return Response({'message': error_message, 'field': 'username/password/email'}, status=400)
+        return Response({'message': error_message, 'field': field}, status=400)
     def delete(self,request):
         '''
             Manage the logout process
         '''
-        key_safes, error_message = are_keys_in_dict(request.data, 'refresh_token')
+        key_safes, error_message, field = are_keys_in_dict(request.data, 'refresh_token')
         if key_safes:
             try:
                 refresh_token = RefreshToken(request.data['refresh_token'])
             except TokenError:
-                return Response({'message':'Token invalid', 'field':'refresh_token'},status=200)
+                return Response({'message':'Token invalid'},status=200)
             refresh_token.blacklist()
             return Response({'message':'Token invalided'},status=200)
         return Response({'message': error_message, 'field': 'refresh_token'}, status=400)
@@ -101,7 +101,7 @@ class UserAuthAPIView(APIView):
         '''
             Manage delete process from an user
         '''
-        key_safes, error_message = are_keys_in_dict(request.data, 'refresh_token')
+        key_safes, error_message, field = are_keys_in_dict(request.data, 'refresh_token')
         if key_safes:
             user_id=AccessToken(request.META['HTTP_AUTHORIZATION'].split(' ')[1]).payload['user']['id']
             user=UserOwnModel.objects.filter(id=user_id).first()
@@ -126,7 +126,7 @@ class ForgotPasswordAPIView(APIView):
         '''
             Handle forgot password request
         '''
-        keys_safe, error_message = are_keys_in_dict(request.data, 'email')
+        keys_safe, error_message, field = are_keys_in_dict(request.data, 'email')
         if keys_safe:
             email = request.data['email']
             user = UserOwnModel.objects.filter(email=email).first()
@@ -158,7 +158,7 @@ class ForgotPasswordAPIView(APIView):
         '''
             Handle reset password request
         '''
-        keys_safe, error_message = are_keys_in_dict(request.data, 'user_code', 'new_password', 'new_password_confirmation')
+        keys_safe, error_message, field = are_keys_in_dict(request.data, 'user_code', 'new_password', 'new_password_confirmation')
         if keys_safe:
             code = request.data['user_code']
             new_password = request.data['new_password']
@@ -185,19 +185,18 @@ class ForgotPasswordAPIView(APIView):
             # Invalid code
             return Response({'message': f"Code {code} is not valid", 'field': 'user_code'}, status=400)
         # Required fields not provided
-        return Response({'message': error_message, 'field': 'user_code/new_password/new_password_confirmation'}, status=400)
+        return Response({'message': error_message, 'field': field}, status=400)
 
 class ResetPasswordAPIView(APIView):
     '''
         API View for handling password reset with the old password
     '''
-    permission_classes = [AllowAny]
 
     def post(self, request: HttpRequest):
         '''
             Handle reset password request
         '''
-        keys_safe, error_message = are_keys_in_dict(request.data, 'old_password', 'new_password', 'new_password_confirmation')
+        keys_safe, error_message, field = are_keys_in_dict(request.data, 'old_password', 'new_password', 'new_password_confirmation')
         # Check if keys are in the request
         if keys_safe:
             old_password = request.data['old_password']
@@ -223,7 +222,7 @@ class ResetPasswordAPIView(APIView):
             # Old password incorrect
             return Response({'message': 'Incorrect old password', 'field': 'old_password'}, status=400)
         # Required fields not provided
-        return Response({'message': error_message, 'field': 'old_password/new_password/new_password_confirmation'}, status=400)
+        return Response({'message': error_message, 'field': field}, status=400)
 
 class IsRefreshTokenValidAPIView(APIView):
     '''
@@ -234,7 +233,7 @@ class IsRefreshTokenValidAPIView(APIView):
         '''
             Check if the refresh is valid
         '''
-        keys_safe, error_message = are_keys_in_dict(request.data, 'refresh_token')
+        keys_safe, error_message, field = are_keys_in_dict(request.data, 'refresh_token')
         # Check if keys are in the request
         if keys_safe:
             try:
@@ -243,4 +242,4 @@ class IsRefreshTokenValidAPIView(APIView):
                 return Response({'message':'Refresh token is valid'},status=200)
             except TokenError:
                 return Response({'message':'Refresh token is invalid'},status=400)
-        return Response({'message':error_message})
+        return Response({'message':error_message},status=400)

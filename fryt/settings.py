@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'apps.categorys',
     'apps.ws',
     'apps.chat',
-    'apps.posts'
+    'apps.posts',
+    'apps.notifications'
 ]
 
 MIDDLEWARE = [
@@ -76,6 +77,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "fryt.wsgi.application"
 ASGI_APPLICATION = "fryt.asgi.application"
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -83,6 +85,10 @@ CHANNEL_LAYERS = {
             "hosts": [os.getenv('REDIS_DB_HOST')],
         },
     },
+}
+
+VAPID_CLAIMS = {
+    "sub": "mailto:danielmontoyaluna67@gmail.com"
 }
 
 # Database
