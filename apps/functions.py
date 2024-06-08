@@ -2,10 +2,9 @@ import os
 from django.conf import settings
 from fryt.settings import BASE_DIR
 from pywebpush import webpush, WebPushException
-from notifications.models import SubscriptionNotificationModel
 
 def send_notification(user, payload):
-    subscriptions = SubscriptionNotificationModel.objects.filter(user = user)
+    subscriptions = user.subscription_notifications
     private_key = os.path.join(BASE_DIR,'private_key.pem')
     vapid_claims = settings.VAPID_CLAIMS
     for subscription in subscriptions:

@@ -1,9 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from authentication.models import UserOwnModel
+from apps.authentication.models import UserOwnModel
 from rest_framework_simplejwt.tokens import AccessToken
 from .models import SubscriptionNotificationModel
-from functions import are_keys_in_dict
+from apps.functions import are_keys_in_dict
 
 class SubscribeBrowserAPIView(APIView):
     def post(self, request):

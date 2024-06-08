@@ -1,8 +1,8 @@
 from django.db import models
-from authentication.models import UserOwnModel
+from apps.authentication.models import UserOwnModel
 
 class SubscriptionNotificationModel(models.Model):
-    user = models.ForeignKey(UserOwnModel, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserOwnModel, on_delete=models.CASCADE,related_name='subscription_notifications')
     auth = models.CharField(max_length=100)
     endpoint = models.URLField(max_length=500)
     p256dh = models.CharField(max_length=100)
