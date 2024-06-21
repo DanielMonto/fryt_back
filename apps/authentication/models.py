@@ -120,6 +120,3 @@ class PasswordResetRequest(models.Model):
         # Code invalid deleted, returning False
         password_reset_request.delete()
         return False
-
-#1029580425JO'han
-#https://www.facebook.com/login_alerts/start/?fbid=122131509242221724&s=j&notif_id=1713215384798992&notif_t=login_alerts_new_device&ref=notif
