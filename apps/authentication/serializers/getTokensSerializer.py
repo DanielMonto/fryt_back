@@ -1,18 +1,7 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import UserOwnModel
-from rest_framework.serializers import ModelSerializer
+from models import UserOwnModel
 
-## Serializers from the classes for easier management in the views
-
-class UserSerializer(ModelSerializer):
-    '''
-        User serializer
-    '''
-    class Meta:
-        model=UserOwnModel
-        fields='__all__'
-
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+class getTokensSerializer(TokenObtainPairSerializer):
     '''
         Serializer used for authentication specifically login
     '''
