@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from datetime import datetime
-from models import UserOwnModel
+from .userModel import UserOwnModel
 import random
 
 def generate_code():

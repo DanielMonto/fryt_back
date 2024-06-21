@@ -1,2 +1,2 @@
 from .userModel import UserOwnModel
-from passwordResetRequestModel import PasswordResetRequest
+from .passwordResetRequestModel import PasswordResetRequest

@@ -1,10 +1,10 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from models import UserOwnModel
+from ..models import UserOwnModel
 from django.http import HttpRequest
-from functions import are_keys_in_dict
-from serializers import getTokensSerializer
+from apps.functions import are_keys_in_dict
+from ..serializers import getTokensSerializer
 
 
 class LogInAPIView(TokenObtainPairView):

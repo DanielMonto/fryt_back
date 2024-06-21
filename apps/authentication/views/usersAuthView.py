@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
-from functions import are_keys_in_dict
+from apps.functions import are_keys_in_dict
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
-from models import UserOwnModel
+from ..models import UserOwnModel
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.response import Response
 

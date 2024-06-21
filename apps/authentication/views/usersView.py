@@ -1,13 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpRequest
-from functions import are_keys_in_dict
+from apps.functions import are_keys_in_dict
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny
-from models import UserOwnModel
-from serializers import UserSerializer
+from ..models import UserOwnModel
+from ..serializers import UserSerializer
 
 class UsersAPIView(APIView):
     '''
