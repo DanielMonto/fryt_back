@@ -15,7 +15,7 @@ def generate_code():
         list_chosen=random.choice(lists)
         char=random.choice(list_chosen)
         code+=str(char)
-    return code 
+    return code
 
 class UserOwnModel(AbstractUser):
     '''
