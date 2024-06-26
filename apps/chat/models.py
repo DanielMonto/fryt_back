@@ -19,7 +19,7 @@ class ChatGroup(models.Model):
 
 class ChatGroupMembership(models.Model):
     '''
-        Model that represents the relation between in members from ChatGroup tu users
+        Model that represents the relation between in members from ChatGroup to users
     '''
     user=models.ForeignKey(UserOwnModel,on_delete=models.CASCADE)
     chat=models.ForeignKey(ChatGroup,on_delete=models.CASCADE)

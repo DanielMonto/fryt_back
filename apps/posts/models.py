@@ -5,7 +5,7 @@ from apps.chat.models import Chat,ChatGroup
 
 # Create your models here.
 class Message(models.Model):
-    user=models.ForeignKey(UserOwnModel,on_delete=models.CASCADE)
+    user=models.ForeignKey(UserOwnModel,on_delete=models.SET_NULL, blank=True, null=True)
     text=models.TextField()
     created=models.DateTimeField(auto_now_add=True)
     chat=models.ForeignKey(Chat,on_delete=models.CASCADE)
@@ -14,7 +14,7 @@ class Message(models.Model):
     video=models.URLField(default=None, null=True, blank=True)
 
 class MessageGroup(models.Model):
-    user=models.ForeignKey(UserOwnModel,on_delete=models.CASCADE)
+    user=models.ForeignKey(UserOwnModel,on_delete=models.SET_NULL, blank=True, null=True)
     text=models.TextField()
     created=models.DateTimeField(auto_now_add=True)
     image=models.URLField(default=None, null=True, blank=True)

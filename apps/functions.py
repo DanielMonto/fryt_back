@@ -1,7 +1,11 @@
 import os
+from functools import wraps
 from django.conf import settings
 from fryt.settings import BASE_DIR
 from pywebpush import webpush, WebPushException
+from apps.authentication.models import UserOwnModel
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
 
 def send_notification(user, payload):
     subscriptions = user.subscription_notifications
@@ -25,6 +29,10 @@ def send_notification(user, payload):
         except WebPushException:
             return 'Push failed'
 
+def get_user_from_access(request):
+    user=UserOwnModel.objects.filter(id=AccessToken(request.META['HTTP_AUTHORIZATION'].split(' ')[1]).payload['user']['id']).first()
+    return user
+
 def are_keys_in_dict(dict,*keys):
     '''
         Checks if all the keys are in dict 
@@ -38,3 +46,13 @@ def are_keys_in_dict(dict,*keys):
         return (False, f'Keys {missing_keys[0]} and {missing_keys[1]} are required',str('/'.join(missing_keys)))
     message=', '.join(missing_keys[:-1]) + f', and {missing_keys[-1]} keys are required'
     return (False,str(message),str('/'.join(missing_keys)))
+
+def check_user_exists(func):
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        user = get_user_from_access(request)
+        if user:
+            return func(request, *args, **kwargs)
+        else:
+            return Response({'message': 'User does not exist'}, status=401)
+    return wrapper

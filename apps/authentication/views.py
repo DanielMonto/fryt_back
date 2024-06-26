@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.template.loader import render_to_string
 from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth.hashers import make_password
-from apps.functions import are_keys_in_dict
+from apps.functions import are_keys_in_dict, check_user_exists
 from .serializers import UserSerializer, LogInWithEmailSerializer, LogInWithUsernameSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.core.mail import EmailMultiAlternatives
@@ -243,7 +243,8 @@ class ResetPasswordAPIView(APIView):
         API View for handling password reset with the old password
     '''
 
-    def post(self, request: HttpRequest):
+    @check_user_exists
+    def post(self, request: HttpRequest, user = None):
         '''
             Handle reset password request
         '''
@@ -253,11 +254,9 @@ class ResetPasswordAPIView(APIView):
             old_password = request.data['old_password']
             new_password = request.data['new_password']
             new_password_confirmation = request.data['new_password_confirmation']
-            user_email = AccessToken(request.META['HTTP_AUTHORIZATION'].split(' ')[1]).payload['user']['email']
-            user = UserOwnModel.objects.filter(email=user_email).first()
 
             # Check if the old password is correct
-            if user and user.check_password(old_password):
+            if user.check_password(old_password):
                 # Check if the new password matches the confirmation
                 if new_password == new_password_confirmation:
                     # Check if the new password is secure
