@@ -83,7 +83,7 @@ class CategoryNormalAPIView(APIView):
         '''
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
+        return Response({'categories':serializer.data})
     
 class CategoryTypeAdminAPIView(APIView):
     '''

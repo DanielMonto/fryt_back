@@ -12,7 +12,7 @@ class ChatAPIView(APIView):
         user=UserOwnModel.objects.get(id=AccessToken(request.META['HTTP_AUTHORIZATION'].split(' ')[1]).payload['user']['id'])
         chats=Chat.objects.filter(Q(user_1=user) or Q(user_2=user))
         serializer=ChatSerializer(chats,many=True)
-        return Response(serializer.data)
+        return Response({'chats':serializer.data})
 
 class ChatGroupAPIView(APIView):
     pass

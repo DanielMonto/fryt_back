@@ -8,22 +8,55 @@ from django.template.loader import render_to_string
 from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth.hashers import make_password
 from apps.functions import are_keys_in_dict
-from .serializers import UserSerializer, MyTokenObtainPairSerializer
+from .serializers import UserSerializer, LogInWithEmailSerializer, LogInWithUsernameSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 from django.conf import settings
 
-class MyTokenObtainPairView(TokenObtainPairView):
+# compare https://docs.google.com/forms/d/e/1FAIpQLSfBDwhTN7l_lxel6p44GC5UD76XwcDojMsFy8BCKkwHbUrwlA/viewform?vc=0&c=0&w=1&flr=0
+
+class LogInWithUsernameView(TokenObtainPairView):
     '''
         View for obtaining access and refresh tokens
     '''
     # Personalization of permissions for an unlogged client can login
     permission_classes = [AllowAny]
-    serializer_class = MyTokenObtainPairSerializer
+    serializer_class = LogInWithUsernameSerializer
     def post(self, request: HttpRequest):
         '''
-            Post method for obtaining the tokens
+            Post method for obtaining the tokens with username
+        '''
+        # Checks if all the keys are in dict
+        key_safes, error_message, field = are_keys_in_dict(request.data, 'username', 'password')
+        if key_safes:
+            username = request.data['username']
+            # Checks if there is an user with client username
+            users = UserOwnModel.objects.filter(username=username)
+            if len(users) != 0:
+                password = request.data['password']
+                user = users[0]
+                # Checks if the client´s provided password is correct
+                if user.check_password(password):
+                    request.data['email'] = user.email
+                    return super().post(request)
+                # Incorrect password
+                return Response({'message': 'incorrect password', 'field': 'password'}, status=400)
+            # username unused
+            return Response({'message': f'username {username} unused', 'field': 'username'}, status=400)
+        # username or password fields unprovided
+        return Response({'message': error_message, 'field': field}, status=400)
+
+class LogInWithEmailView(TokenObtainPairView):
+    '''
+        View for obtaining access and refresh tokens
+    '''
+    # Personalization of permissions for an unlogged client can login
+    permission_classes = [AllowAny]
+    serializer_class = LogInWithEmailSerializer
+    def post(self, request: HttpRequest):
+        '''
+            Post method for obtaining the tokens with email
         '''
         # Checks if all the keys are in dict
         key_safes, error_message, field = are_keys_in_dict(request.data, 'email', 'password')
@@ -40,8 +73,19 @@ class MyTokenObtainPairView(TokenObtainPairView):
                     return super().post(request)
                 # Incorrect password
                 return Response({'message': 'incorrect password', 'field': 'password'}, status=400)
-            # Email unused
-            return Response({'message': f'email {email} unused', 'field': 'email'}, status=400)
+            users = UserOwnModel.objects.filter(username=email)
+            if not users:
+                # Email and username unused
+                return Response({'message': f'email {email} unused', 'field': 'email'}, status=400)
+            password = request.data['password']
+            user = users[0]
+            # Checks if the client´s provided password is correct
+            if user.check_password(password):
+                request.data['username'] = user.username
+                request.data['email'] = user.email
+                return super().post(request)
+            # Incorrect password
+            return Response({'message': 'incorrect password', 'field': 'password'}, status=400)
         # Email or password fields unprovided
         return Response({'message': error_message, 'field': field}, status=400)
 
@@ -95,6 +139,13 @@ class UsersAPIView(APIView):
             refresh_token.blacklist()
             return Response({'message':'Token invalided'},status=200)
         return Response({'message': error_message, 'field': 'refresh_token'}, status=400)
+
+class CreateGuestUserAPIView(APIView):
+    permission_classes = [AllowAny]
+    def post(self,request):
+        new_guest = UserOwnModel.create_guest_user()
+        serializer = UserSerializer(new_guest, many=False)
+        return Response({'user':serializer.data},status=200)
 
 class UserAuthAPIView(APIView):
     def delete(self,request):

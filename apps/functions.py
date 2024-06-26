@@ -33,8 +33,8 @@ def are_keys_in_dict(dict,*keys):
     if not missing_keys:
         return (True, 'All keys in dict',None)
     if len(missing_keys)==1:
-        return (False, f'Key {missing_keys[0]} is required',missing_keys[0],None)
+        return (False, f'Key {missing_keys[0]} is required',missing_keys[0])
     if len(missing_keys)==2:
-        return (False, f'Keys {missing_keys[0]} and {missing_keys[1]} are required','/'.join(missing_keys))
+        return (False, f'Keys {missing_keys[0]} and {missing_keys[1]} are required',str('/'.join(missing_keys)))
     message=', '.join(missing_keys[:-1]) + f', and {missing_keys[-1]} keys are required'
-    return (False,message,'/'.join(missing_keys))
+    return (False,str(message),str('/'.join(missing_keys)))

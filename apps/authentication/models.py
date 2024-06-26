@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 import datetime
 import random
@@ -21,6 +22,9 @@ class UserOwnModel(AbstractUser):
     '''
         User model, for user management
     '''
+    guest = models.BooleanField(default=False)
+    friends = models.ManyToManyField('self')
+    followers = models.ManyToManyField('self')
     @classmethod
     def email_or_username_used(cls,username,email):
         '''
@@ -44,7 +48,17 @@ class UserOwnModel(AbstractUser):
                 message='Username used'
                 field='username'
             return True, message, field
-    
+
+    @classmethod
+    def create_guest_user(cls):
+        while True:
+            username = f'guest{generate_code()}'
+            users = cls.objects.filter(username=username)
+            if not users:
+                new_guest = cls(username=username,password=make_password('123'),guest=True)
+                new_guest.save()
+                return new_guest
+
     @staticmethod
     def safe_password(password):
         '''
@@ -71,6 +85,9 @@ class UserOwnModel(AbstractUser):
             Method for string representation
         '''
         return f"--{self.username} has {self.email}"
+
+    class Meta:
+        ordering = ['-date_joined']
 
 class PasswordResetRequest(models.Model):
     '''
