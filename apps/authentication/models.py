@@ -23,8 +23,12 @@ class UserOwnModel(AbstractUser):
         User model, for user management
     '''
     guest = models.BooleanField(default=False)
-    friends = models.ManyToManyField('self')
+    int_followers = models.PositiveBigIntegerField(default=0)
+    int_follows = models.PositiveBigIntegerField(default=0)
+    int_friends = models.PositiveBigIntegerField(default=0)
     followers = models.ManyToManyField('self')
+    follows = models.ManyToManyField('self')
+    friends = models.ManyToManyField('self')
     @classmethod
     def email_or_username_used(cls,username,email):
         '''

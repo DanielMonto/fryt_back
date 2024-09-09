@@ -1,6 +1,5 @@
 import json
-
-from channels.db import database_sync_to_async
+from .dbFunctions import addMessage
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 class PrivateUsersChatConsumer(AsyncWebsocketConsumer):
@@ -29,7 +28,7 @@ class PrivateUsersChatConsumer(AsyncWebsocketConsumer):
                 'writer':str(writer)
             }
         )
-        # await save_message(td['conversation'],writer,message_text)
+        await addMessage(td['chat_id'],writer,message_text,self)
     async def chat_message(self,event):
         message=event['message']
         writer=event['writer']

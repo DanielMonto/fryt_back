@@ -7,4 +7,4 @@ class FriendshipApplication(models.Model):
 
     @classmethod
     def application_is_valid(cls, applicator, applied):
-        return FriendshipApplication.objects.filter(applicator = applicator, applied = applied).first()  == None
+        return FriendshipApplication.objects.filter(applicator = applicator, applied = applied).first() == None

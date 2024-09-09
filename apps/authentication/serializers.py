@@ -28,7 +28,10 @@ class LogInWithEmailSerializer(TokenObtainPairSerializer):
             'email':user.email,
             'username':user.username,
             'is_staff':user.is_staff,
-            'is_guest':user.guest
+            'is_guest':user.guest,
+            'followers':user.int_followers,
+            'follows':user.int_follows,
+            'friends':user.int_friends
         }
         return token
 
@@ -47,6 +50,9 @@ class LogInWithUsernameSerializer(TokenObtainPairSerializer):
             'email':user.email,
             'username':user.username,
             'is_staff':user.is_staff,
-            'is_guest':user.guest
+            'is_guest':user.guest,
+            'followers':user.int_followers,
+            'follows':user.int_follows,
+            'friends':user.int_friends
         }
         return token

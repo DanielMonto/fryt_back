@@ -4,6 +4,7 @@ from django.conf import settings
 from fryt.settings import BASE_DIR
 from pywebpush import webpush, WebPushException
 from apps.authentication.models import UserOwnModel
+from django.http import HttpRequest
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -49,10 +50,9 @@ def are_keys_in_dict(dict,*keys):
 
 def check_user_exists(func):
     @wraps(func)
-    def wrapper(request, *args, **kwargs):
+    def wrapper(self, request, *args, **kwargs):
         user = get_user_from_access(request)
         if user:
-            return func(request, *args, **kwargs)
-        else:
-            return Response({'message': 'User does not exist'}, status=401)
+            return func(self, request, user, *args, **kwargs)
+        return Response({'message': 'User does not exist'}, status=401)
     return wrapper
