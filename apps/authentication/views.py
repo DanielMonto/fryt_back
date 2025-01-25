@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import HttpRequest
 from rest_framework.permissions import AllowAny
+from django.shortcuts import render
 from .models import UserOwnModel, PasswordResetRequest
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.template.loader import render_to_string
@@ -12,9 +13,20 @@ from .serializers import UserSerializer, LogInWithEmailSerializer, LogInWithUser
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+from django.http import FileResponse, Http404
+import os
 from django.conf import settings
 
 # compare https://docs.google.com/forms/d/e/1FAIpQLSfBDwhTN7l_lxel6p44GC5UD76XwcDojMsFy8BCKkwHbUrwlA/viewform?vc=0&c=0&w=1&flr=0
+
+class EsniderDescargar(APIView):
+    permission_classes = [AllowAny]
+    def get(self,request):
+        file_path = os.path.join(settings.STATIC_ROOT, 'videoplayback.mp4')
+        try:
+            return FileResponse(open(file_path, 'rb'), as_attachment=True, filename='videoplayback.mp4')
+        except FileNotFoundError:
+            raise Http404("El archivo no existe.")
 
 class LogInWithUsernameView(TokenObtainPairView):
     '''
@@ -98,7 +110,7 @@ class UsersAPIView(APIView):
     def get(self,request):
         users=UserOwnModel.objects.all()
         serializer=UserSerializer(users,many=True)
-        return Response(serializer.data)
+        return Response({'users':serializer.data})
     def post(self, request: HttpRequest):
         '''
             Manage the registering of an user
@@ -148,13 +160,14 @@ class CreateGuestUserAPIView(APIView):
         return Response({'user':serializer.data},status=200)
 
 class UserAuthAPIView(APIView):
+    permission_classes = [AllowAny]
     def delete(self,request):
         '''
             Manage delete process from an user
         '''
         key_safes, error_message, field = are_keys_in_dict(request.data, 'refresh_token')
         if key_safes:
-            user_id=AccessToken(request.META['HTTP_AUTHORIZATION'].split(' ')[1]).payload['user']['id']
+            user_id=RefreshToken(request.data['refresh_token']).payload['user']['id']
             user=UserOwnModel.objects.filter(id=user_id).first()
             if user:
                 user.delete()

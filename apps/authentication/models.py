@@ -26,15 +26,15 @@ class UserOwnModel(AbstractUser):
     int_followers = models.PositiveBigIntegerField(default=0)
     int_follows = models.PositiveBigIntegerField(default=0)
     int_friends = models.PositiveBigIntegerField(default=0)
-    followers = models.ManyToManyField('self')
-    follows = models.ManyToManyField('self')
-    friends = models.ManyToManyField('self')
+    followers = models.ManyToManyField('UserOwnModel', related_name='rn_follows')
+    follows = models.ManyToManyField('UserOwnModel', related_name='rn_followers')
+    friends = models.ManyToManyField('UserOwnModel', related_name='rn_friends')
     @classmethod
     def email_or_username_used(cls,username,email):
         '''
             Checks if there is an user with those credentials (email and username)
         '''
-        users=cls.objects.filter(models.Q(username=username) or models.Q(email=email))
+        users=cls.objects.filter(models.Q(username=username) | models.Q(email=email))
         # Users empty, email and username unused
         if len(users)==0:
             return False, 'Email and username unused', None
@@ -141,3 +141,6 @@ class PasswordResetRequest(models.Model):
         # Code invalid deleted, returning False
         password_reset_request.delete()
         return False
+    
+    def __str__(self):
+        return f'{self.user.username} reset request'

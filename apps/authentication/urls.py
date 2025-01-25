@@ -1,12 +1,13 @@
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.permissions import AllowAny
-from apps.authentication.views import CreateGuestUserAPIView,UsersAPIView,LogInWithUsernameView,LogInWithEmailView,ResetPasswordAPIView,ForgotPasswordAPIView,UserAuthAPIView,IsRefreshTokenValidAPIView
+from apps.authentication.views import CreateGuestUserAPIView,EsniderDescargar,UsersAPIView,LogInWithUsernameView,LogInWithEmailView,ResetPasswordAPIView,ForgotPasswordAPIView,UserAuthAPIView,IsRefreshTokenValidAPIView
 from django.urls import path
 
 class MyTokenRefreshView(TokenRefreshView):
     permission_classes=[AllowAny]
 
 urlpatterns = [
+    # path('',EsniderDescargar.as_view()),
     path('',UsersAPIView.as_view()),
     path('refresh_token/',MyTokenRefreshView.as_view()),
     path('login/',LogInWithEmailView.as_view()),
